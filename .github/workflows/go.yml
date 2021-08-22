@@ -19,7 +19,20 @@ jobs:
         go-version: 1.17
 
     - name: Build Server
-      run: go build -v ./v1/main.go
+      run: go build -o build/douglasie -v ./v1/main.go
+
 
     - name: Build CLI
-      run: go build -v ./v1/cli/main.go
+      run: go build -o build/douglasie-cli -v ./v1/cli/main.go
+
+    - name: Upload artifacts server
+      uses: actions/upload-artifact@v2
+      with:
+        name: douglasie
+        path: build/douglasie
+
+    - name: Upload artifacts CLI
+      uses: actions/upload-artifact@v2
+      with:
+        name: douglasie-cli
+        path: build/douglasie-cli
