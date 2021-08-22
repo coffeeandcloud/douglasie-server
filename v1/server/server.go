@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"log"
 	"net"
 
@@ -37,12 +37,15 @@ func (s *parquetServer) ReadRows(in *rpc.GetRowsReq, stream rpc.Parquet_ReadRows
 		return err
 	}
 	for _, row := range rows {
-		for k, v := range row {
-			stream.SendMsg(&rpc.Row{
-				Key: k,
-				Val: fmt.Sprintf("%s", v),
-			})
+		json, err := json.Marshal(row)
+
+		if err != nil {
+			return err
 		}
+
+		stream.Send(&rpc.Row{
+			Fields: json,
+		})
 	}
 
 	return nil

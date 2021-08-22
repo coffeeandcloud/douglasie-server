@@ -25,6 +25,5 @@ message GetRowsReq {
 }
 
 message Row {
-  string key = 1;
-  string val = 2;
+  bytes fields = 1;
 }
