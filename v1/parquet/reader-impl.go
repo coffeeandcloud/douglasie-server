@@ -47,3 +47,7 @@ func (ref *FileRef) ReadLines(startLine int64, offset int64) ([]map[string]inter
 func (ref *FileRef) GetSchema() (*schema.PathMapType, error) {
 	return ref.reader.SchemaHandler.PathMap, nil
 }
+
+func (ref *FileRef) GetNumRows() (int64, error) {
+	return ref.reader.GetNumRows(), nil
+}

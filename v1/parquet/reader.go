@@ -6,9 +6,10 @@ import (
 )
 
 type FileRef struct {
-	reader *reader.ParquetReader
-	Path   string
-	IsOpen bool
+	reader    *reader.ParquetReader
+	Path      string
+	IsOpen    bool
+	NumOfRows int64
 }
 
 type ParquetReader interface {
@@ -17,4 +18,5 @@ type ParquetReader interface {
 	CloseFile() error
 	ReadLines(startLine int64, offset int64) ([]interface{}, error)
 	GetSchema() (*schema.PathMapType, error)
+	GetNumRows() (int64, error)
 }

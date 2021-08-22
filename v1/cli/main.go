@@ -27,4 +27,32 @@ func main() {
 		log.Fatalf("could not open parquet: %v", err)
 	}
 	log.Printf("File '%s' has %d rows.", r.Filename, r.NumOfRows)
+
+	/*
+		rowsClient, err := c.ReadRows(ctx, &rpc.GetRowsReq{
+			Path:      "sample/flat.parquet",
+			StartLine: 0,
+			Offset:    50,
+		})
+		if err != nil {
+			log.Fatalf("could not open parquet: %v", err)
+		}
+
+
+			rows := make([][]string, 0)
+
+
+			for {
+				row, err := rowsClient.Recv()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					log.Fatalf("%v.ListFeatures(_) = _, %v", rowsClient, err)
+				}
+				cpRow := make([]string, 0)
+				//cpRow = append(cpRow, v)
+			}
+	*/
+
 }
