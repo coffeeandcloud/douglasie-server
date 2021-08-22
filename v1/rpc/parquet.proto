@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "github.com/coffeeandcloud/douglasie-server/v1/rpc";
+
+package rpc;
+
+service Parquet {
+  rpc OpenFile (OpenFileReq) returns (FileInfoResp) {}
+  rpc ReadRows (GetRowsReq) returns (stream Row) {}
+}
+
+message OpenFileReq {
+  string filename = 1;
+}
+
+message FileInfoResp {
+  string filename = 1;
+  int64 numOfRows = 2;
+}
+
+message GetRowsReq {
+  string path = 1;
+  int32 startLine = 2;
+  int32 offset = 3;
+}
+
+message Row {
+  string key = 1;
+  string val = 2;
+}

@@ -1,16 +1,20 @@
 package parquet
 
-import "github.com/xitongsys/parquet-go/reader"
+import (
+	"github.com/xitongsys/parquet-go/reader"
+	"github.com/xitongsys/parquet-go/schema"
+)
 
 type FileRef struct {
 	reader *reader.ParquetReader
-	Path string;
-	IsOpen bool;
+	Path   string
+	IsOpen bool
 }
 
 type ParquetReader interface {
 	New() *ParquetReader
-	Open() (error)
-	CloseFile(file FileRef) (error)
-	ReadLines(startLine int64, offset int64) ([]string, error)
+	Open() error
+	CloseFile() error
+	ReadLines(startLine int64, offset int64) ([]interface{}, error)
+	GetSchema() (*schema.PathMapType, error)
 }
