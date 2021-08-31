@@ -1,67 +1,63 @@
 package server
 
 import (
-	"context"
-	"encoding/json"
 	"log"
-	"net"
 
 	"github.com/coffeeandcloud/douglasie-server/v1/parquet"
-	"github.com/coffeeandcloud/douglasie-server/v1/rpc"
-	grpc "google.golang.org/grpc"
+	"github.com/gin-gonic/gin"
 )
 
-type parquetServer struct {
-	ref *parquet.FileRef
-	rpc.UnimplementedParquetServer
-}
+func Run() {
 
-func (s *parquetServer) OpenFile(ctx context.Context, in *rpc.OpenFileReq) (*rpc.FileInfoResp, error) {
-	s.ref = &parquet.FileRef{
-		Path: in.Filename,
-	}
-	err := s.ref.Open()
-	if err != nil {
-		return nil, err
-	}
-	numOfRows, _ := s.ref.GetNumRows()
-	return &rpc.FileInfoResp{
-		Filename:  s.ref.Path,
-		NumOfRows: numOfRows,
-	}, nil
-}
+	r := gin.Default()
 
-func (s *parquetServer) ReadRows(in *rpc.GetRowsReq, stream rpc.Parquet_ReadRowsServer) error {
-	rows, err := s.ref.ReadLines(int64(in.StartLine), int64(in.Offset))
-	if err != nil {
-		return err
-	}
-	for _, row := range rows {
-		json, err := json.Marshal(row)
+	r.GET("/info/*action", func(c *gin.Context) {
+		path := c.Params.ByName("action")
+		log.Printf("URL: %s", path)
+
+		ref := &parquet.FileRef{
+			Path: path,
+		}
+		err := ref.Open()
 
 		if err != nil {
-			return err
+			log.Fatalf("Error opening file '%s': %s", ref.Path, err)
 		}
 
-		stream.Send(&rpc.Row{
-			Fields: json,
+		numOfRows, _ := ref.GetNumRows()
+
+		c.JSON(200, gin.H{
+			"numOfRows": numOfRows,
+			"Path":      ref.Path,
 		})
-	}
 
-	return nil
-}
+		ref.CloseFile()
+	})
 
-func Run() {
-	// lis, err := net.Listen("unix", "/tmp/douglasie.sock")
-	lis, err := net.Listen("tcp", ":5555")
+	r.GET("/content/*action", func(c *gin.Context) {
+		startLine := 0
+		offset := 10
+
+		path := c.Params.ByName("action")
+
+		ref := &parquet.FileRef{
+			Path: path,
+		}
+		err := ref.Open()
+
+		rows, err := ref.ReadLines(int64(startLine), int64(offset))
+		if err != nil {
+			log.Fatalf("Error opening file '%s': %s", ref.Path, err)
+		}
+		c.JSON(200, gin.H{
+			"items": rows,
+		})
+	})
+
+	socket := "/tmp/douglasie.sock"
+	err := r.RunUnix(socket)
 
 	if err != nil {
-		log.Panicln(err)
-	}
-
-	s := grpc.NewServer()
-	rpc.RegisterParquetServer(s, &parquetServer{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("An error occurred on the socket '%s': %s", socket, err)
 	}
 }

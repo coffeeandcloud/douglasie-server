@@ -27,6 +27,10 @@ func (ref *FileRef) Open() error {
 	return nil
 }
 
+func (ref *FileRef) CloseFile() error {
+	return ref.reader.PFile.Close()
+}
+
 func (ref *FileRef) ReadLines(startLine int64, offset int64) ([]map[string]interface{}, error) {
 	result := make([]map[string]interface{}, 0)
 	ref.reader.SkipRows(startLine)
